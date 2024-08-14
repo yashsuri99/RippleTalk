@@ -1,0 +1,14 @@
+{
+	"configurations": [
+		{
+			"type": "java",
+			"name": "Spring Boot-RippletalkBackendApplication<rippletalk-backend>",
+			"request": "launch",
+			"cwd": "${workspaceFolder}",
+			"mainClass": "com.rippletalk.rippletalk_backend.RippletalkBackendApplication",
+			"projectName": "rippletalk-backend",
+			"args": "",
+			"envFile": "${workspaceFolder}/.env"
+		}
+	]
+}
