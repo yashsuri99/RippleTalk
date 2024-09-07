@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Modal } from '../../../../components/Modal/Modal';
 import { RegistrationStepCounter } from '../RegisterStepCounter/RegistrationStepCounter';
 import { determineModalContent } from '../../../../utils/RegisterModalUtils';
@@ -8,8 +8,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import { decrementStep } from '../../../../redux/Slices/RegisterSlice';
 
 export const RegisterModal: React.FC = () => {
-	const [step, setStep] = useState<number>(1);
-
 	const state = useSelector((state: RootState) => state.register);
 
 	const dispatch: AppDispatch = useDispatch();

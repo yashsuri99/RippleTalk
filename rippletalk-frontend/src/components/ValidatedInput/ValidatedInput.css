@@ -15,9 +15,38 @@
   border: none;
   padding: 0;
   z-index: 5;
+  box-shadow: none !important;
+  transition: background-color 5000s ease-in-out 10s;
+}
+
+input:-webkit-autofill {
+  background-color: rgba(256, 256, 256, 0) !important;
+}
+
+input:-webkit-autofill:focus {
+  background-color: rgba(256, 256, 256, 0) !important;
 }
 
 .validated-input-value:focus {
   outline: none;
   border: none;
 } 
+
+.validated-date-selector {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  width: 100%;
+}
+
+.validated-input-remainder {
+  position: absolute;
+  top: 5px;
+  right: 10px;font-size: 13px;
+  font-weight: 500;
+  color: #657786;
+}
+
+.dropdown-container {
+  margin-bottom: 20px;
+}

@@ -2,7 +2,7 @@ import styled from 'styled-components';
 import { StyledNextButtonProps } from '../../../../utils/GlobalInterfaces';
 
 export const StyledNextButton = styled.button<StyledNextButtonProps>`
-	width: 100%;
+	width: 75%;
 	height: 52px;
 	color: white;
 	font-size: 17px;
@@ -12,5 +12,6 @@ export const StyledNextButton = styled.button<StyledNextButtonProps>`
 			: props.theme.colors.black};
 	opacity: ${(props) => (props.active ? 1.0 : 0.5)};
 	border-radius: 50px;
+	border: none;
 	cursor: ${(props) => (props.active ? 'pointer' : 'auto')};
 `;

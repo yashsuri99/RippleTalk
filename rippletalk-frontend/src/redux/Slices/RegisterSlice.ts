@@ -1,4 +1,5 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
+import axios from 'axios';
 import { Dob } from '../../utils/GlobalInterfaces';
 
 interface RegisterSliceState {
@@ -13,11 +14,35 @@ interface RegisterSliceState {
 	dob: Dob;
 	dobValid: boolean;
 	step: number;
+	username: string;
+	phoneNumber: string;
 }
 
 interface UpdatePayload {
 	name: string;
 	value: string | number | boolean;
+}
+
+interface RegisterUser {
+	firstName: string;
+	lastName: string;
+	email: string;
+	dob: string;
+}
+
+interface UpdatePhone {
+	username: string;
+	phone: string;
+}
+
+interface VerifyCode {
+	username: string;
+	code: string;
+}
+
+interface UpdatePassword {
+	username: string;
+	password: string;
 }
 
 const initialState: RegisterSliceState = {
@@ -36,7 +61,80 @@ const initialState: RegisterSliceState = {
 	},
 	dobValid: false,
 	step: 1,
+	username: '',
+	phoneNumber: '',
 };
+
+export const registerUser = createAsyncThunk(
+	'register/register',
+	async (user: RegisterUser, thunkApi) => {
+		try {
+			const req = await axios.post('http://localhost:8080/auth/register', user);
+			return await req.data;
+		} catch (e) {
+			return thunkApi.rejectWithValue(e);
+		}
+	}
+);
+
+export const updateUserPhone = createAsyncThunk(
+	'register/phone',
+	async (body: UpdatePhone, thunkApi) => {
+		try {
+			const req = await axios.put(
+				'http://localhost:8080/auth/update/phone',
+				body
+			);
+			const email = await axios.post('http://localhost:8080/auth/email/code', {
+				username: body.username,
+			});
+		} catch (e) {
+			return thunkApi.rejectWithValue(e);
+		}
+	}
+);
+
+export const resendEmail = createAsyncThunk(
+	'register/resend',
+	async (username: string, thunkApi) => {
+		try {
+			const req = await axios.post('http://localhost:8080/auth/email/code', {
+				username,
+			});
+		} catch (e) {
+			return thunkApi.rejectWithValue(e);
+		}
+	}
+);
+
+export const sendVerification = createAsyncThunk(
+	'register/verify',
+	async (body: VerifyCode, thunkApi) => {
+		try {
+			const req = await axios.post(
+				'http://localhost:8080/auth/email/verify',
+				body
+			);
+			return req.data;
+		} catch (e) {
+			return thunkApi.rejectWithValue(e);
+		}
+	}
+);
+
+export const updateUserPassword = createAsyncThunk(
+	'register/password',
+	async (body: UpdatePassword, thunkApi) => {
+		try {
+			const req = await axios.put(
+				'http://localhost:8080/auth/update/password',
+				body
+			);
+		} catch (e) {
+			return thunkApi.rejectWithValue(e);
+		}
+	}
+);
 
 export const RegisterSlice = createSlice({
 	name: 'register',
@@ -64,8 +162,6 @@ export const RegisterSlice = createSlice({
 				};
 			}
 
-			console.log('Global state update: ', state);
-
 			return state;
 		},
 		incrementStep(state) {
@@ -79,6 +175,144 @@ export const RegisterSlice = createSlice({
 				state.step--;
 			}
 		},
+	},
+	extraReducers: (builder) => {
+		builder.addCase(registerUser.pending, (state, action) => {
+			state.loading = true;
+			return state;
+		});
+
+		builder.addCase(updateUserPhone.pending, (state, action) => {
+			state = {
+				...state,
+				loading: true,
+			};
+			return state;
+		});
+
+		builder.addCase(resendEmail.pending, (state, action) => {
+			state = {
+				...state,
+				loading: true,
+			};
+			return state;
+		});
+
+		builder.addCase(sendVerification.pending, (state, action) => {
+			state = {
+				...state,
+				loading: true,
+			};
+			return state;
+		});
+
+		builder.addCase(updateUserPassword.pending, (state, action) => {
+			state = {
+				...state,
+				loading: true,
+			};
+			return state;
+		});
+
+		builder.addCase(registerUser.fulfilled, (state, action) => {
+			let nextStep = state.step + 1;
+			state = {
+				...state,
+				username: action.payload.username,
+				loading: false,
+				error: false,
+				step: nextStep,
+			};
+			return state;
+		});
+
+		builder.addCase(updateUserPhone.fulfilled, (state, action) => {
+			let nextStep = state.step + 1;
+			state = {
+				...state,
+				loading: false,
+				error: false,
+				step: nextStep,
+			};
+			return state;
+		});
+
+		builder.addCase(resendEmail.fulfilled, (state, action) => {
+			state = {
+				...state,
+				loading: false,
+				error: false,
+			};
+			return state;
+		});
+
+		builder.addCase(sendVerification.fulfilled, (state, action) => {
+			let nextStep = state.step + 1;
+			state = {
+				...state,
+				loading: false,
+				error: false,
+				step: nextStep,
+			};
+			return state;
+		});
+
+		builder.addCase(updateUserPassword.fulfilled, (state, action) => {
+			state = {
+				...state,
+				loading: false,
+				error: false,
+			};
+			console.log('forward user to homepage');
+			console.log(
+				'call the login thunk to be made, to make sure JWT token is created'
+			);
+
+			return state;
+		});
+
+		builder.addCase(registerUser.rejected, (state, action) => {
+			state.error = true;
+			state.loading = false;
+			return state;
+		});
+
+		builder.addCase(updateUserPhone.rejected, (state, action) => {
+			state = {
+				...state,
+				loading: false,
+				error: true,
+			};
+			return state;
+		});
+
+		builder.addCase(resendEmail.rejected, (state, action) => {
+			state = {
+				...state,
+				loading: false,
+				error: true,
+			};
+			return state;
+		});
+
+		builder.addCase(sendVerification.rejected, (state, action) => {
+			state = {
+				...state,
+				loading: false,
+				error: true,
+			};
+			return state;
+		});
+
+		builder.addCase(updateUserPassword.rejected, (state, action) => {
+			state = {
+				...state,
+				loading: false,
+				error: true,
+			};
+
+			return state;
+		});
 	},
 });
 
