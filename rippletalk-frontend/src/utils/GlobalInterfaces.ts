@@ -44,3 +44,17 @@ export interface StyledCheckboxProps {
 	active: boolean;
 	theme: Theme;
 }
+
+export interface User {
+	userId: number;
+	firstName: string;
+	lastName: string;
+	email: string;
+	username: string;
+	phone: string;
+	dateOfBirth: string;
+	bio: string;
+	nickname: string;
+	profilePicture: string;
+	bannerPicture: string;
+}

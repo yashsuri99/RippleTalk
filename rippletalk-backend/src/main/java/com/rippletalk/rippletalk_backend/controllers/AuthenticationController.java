@@ -8,13 +8,19 @@ import com.rippletalk.rippletalk_backend.exceptions.EmailFailedToSendException;
 import com.rippletalk.rippletalk_backend.exceptions.IncorrectVerificationCodeException;
 import com.rippletalk.rippletalk_backend.exceptions.UserDoesNotExistException;
 import com.rippletalk.rippletalk_backend.models.ApplicationUser;
+import com.rippletalk.rippletalk_backend.models.LoginResponse;
 import com.rippletalk.rippletalk_backend.models.RegistrationObject;
+import com.rippletalk.rippletalk_backend.services.TokenService;
 import com.rippletalk.rippletalk_backend.services.UserService;
 
 import java.util.LinkedHashMap;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,9 +33,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 public class AuthenticationController {
 
   private final UserService userService;
+  private final TokenService tokenService;
+  private final AuthenticationManager authenticationManager;
 
-  public AuthenticationController(UserService userService) {
+  public AuthenticationController(UserService userService, TokenService tokenService,
+      AuthenticationManager authenticationManager) {
     this.userService = userService;
+    this.tokenService = tokenService;
+    this.authenticationManager = authenticationManager;
   }
 
   @ExceptionHandler({ EmailAlreadyTakenException.class })
@@ -38,7 +49,7 @@ public class AuthenticationController {
   }
 
   @PostMapping("/register")
-  public ApplicationUser registerUser(@RequestBody RegistrationObject ro) {
+  public ApplicationUser registerUser(@RequestBody RegistrationObject ro) throws EmailAlreadyTakenException {
     return userService.registerUser(ro);
   }
 
@@ -48,7 +59,8 @@ public class AuthenticationController {
   }
 
   @PutMapping("/update/phone")
-  public ApplicationUser updatePhoneNumber(@RequestBody LinkedHashMap<String, String> body) {
+  public ApplicationUser updatePhoneNumber(@RequestBody LinkedHashMap<String, String> body)
+      throws UserDoesNotExistException, EmailAlreadyTakenException {
     String username = body.get("username");
     String phone = body.get("phone");
 
@@ -65,7 +77,8 @@ public class AuthenticationController {
   }
 
   @PostMapping("/email/code")
-  public ResponseEntity<String> createEmailVerfication(@RequestBody LinkedHashMap<String, String> body) {
+  public ResponseEntity<String> createEmailVerfication(@RequestBody LinkedHashMap<String, String> body)
+      throws UserDoesNotExistException, EmailFailedToSendException {
 
     userService.generateEmailVerififcation(body.get("username"));
 
@@ -79,7 +92,8 @@ public class AuthenticationController {
   }
 
   @PostMapping("/email/verify")
-  public ApplicationUser verifyEmail(@RequestBody LinkedHashMap<String, String> body) {
+  public ApplicationUser verifyEmail(@RequestBody LinkedHashMap<String, String> body)
+      throws UserDoesNotExistException, IncorrectVerificationCodeException {
 
     Long code = Long.parseLong(body.get("code"));
 
@@ -89,7 +103,8 @@ public class AuthenticationController {
   }
 
   @PutMapping("/update/password")
-  public ApplicationUser updatePassword(@RequestBody LinkedHashMap<String, String> body) {
+  public ApplicationUser updatePassword(@RequestBody LinkedHashMap<String, String> body)
+      throws UserDoesNotExistException {
 
     String username = body.get("username");
     String password = body.get("password");
@@ -98,4 +113,21 @@ public class AuthenticationController {
 
   }
 
+  @PostMapping("/login")
+  public LoginResponse login(@RequestBody LinkedHashMap<String, String> body) throws UserDoesNotExistException {
+
+    String username = body.get("username");
+    String password = body.get("password");
+
+    try {
+      Authentication auth = authenticationManager.authenticate(
+          new UsernamePasswordAuthenticationToken(username, password));
+
+      String token = tokenService.generateToken(auth);
+      return new LoginResponse(userService.getUserByUsername(username), token);
+    } catch (AuthenticationException e) {
+      return new LoginResponse(null, "");
+    }
+
+  }
 }

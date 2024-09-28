@@ -1,10 +1,10 @@
-import { RegisterFormFour } from '../features/register/components/RegisterFormFour/RegisterFormFour';
-import { RegisterFormOne } from '../features/register/components/RegisterFormOne/RegisterFormOne';
-import { RegisterFormThree } from '../features/register/components/RegisterFormThree/RegisterFormThree';
-import { RegisterFormTwo } from '../features/register/components/RegisterFormTwo/RegisterFormTwo';
+import { RegisterFormFour } from '../features/register/components/RegisterForms/RegisterFormFour';
+import { RegisterFormOne } from '../features/register/components/RegisterForms/RegisterFormOne';
+import { RegisterFormThree } from '../features/register/components/RegisterForms/RegisterFormThree';
+import { RegisterFormTwo } from '../features/register/components/RegisterForms/RegisterFormTwo';
 import data from '../data/codes.json';
-import { RegisterFormFive } from '../features/register/components/RegisterFormFive/RegisterFormFive';
-import { RegisterFormSix } from '../features/register/components/RegisterFormSix/RegisterFormSix';
+import { RegisterFormFive } from '../features/register/components/RegisterForms/RegisterFormFive';
+import { RegisterFormSix } from '../features/register/components/RegisterForms/RegisterFormSix';
 
 export const determineModalContent = (step: number): JSX.Element => {
 	switch (step) {

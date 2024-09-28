@@ -4,17 +4,14 @@ import { DropDown } from '../../../../components/Dropdown/Dropdown';
 import { ValidatedTextInput } from '../../../../components/ValidatedInput/ValidatedTextInput';
 import { countryCodeDropDown } from '../../../../utils/RegisterModalUtils';
 import { validatePhone } from '../../../../services/Validators';
-import { StyledNextButton } from '../RegisterNextButton/RegisterNextButton';
-import { useDispatch, useSelector } from 'react-redux';
-import { AppDispatch, RootState } from '../../../../redux/Store';
-import {
-	updateUserPhone,
-	updateRegister,
-} from '../../../../redux/Slices/RegisterSlice';
-import './RegisterFormFour.css';
+import { useDispatch } from 'react-redux';
+import { AppDispatch } from '../../../../redux/Store';
+import { updateRegister } from '../../../../redux/Slices/RegisterSlice';
+
+import './RegisterForms.css';
+import '../../../../assets/global.css';
 
 export const RegisterFormFour: React.FC = () => {
-	const state = useSelector((state: RootState) => state.register);
 	const dispatch: AppDispatch = useDispatch();
 
 	const [phoneCode, setPhoneCode] = useState<string>('+91');
@@ -35,30 +32,33 @@ export const RegisterFormFour: React.FC = () => {
 		);
 	};
 
-	const sendPhoneNumber = () => {
-		dispatch(
-			updateUserPhone({
-				username: state.username,
-				phone: phoneNumber,
-			})
-		);
-	};
-
 	useEffect(() => {
 		if (phoneNumber) {
 			setValidNumber(validatePhone(phoneNumber));
+			dispatch(
+				updateRegister({
+					name: 'phoneNumberValid',
+					value: validatePhone(phoneNumber),
+				})
+			);
 		}
 	}, [phoneCode, phoneNumber]);
 
 	return (
-		<div className='reg-step-four-container'>
-			<div className='reg-step-four-content'>
-				<h1 className='reg-step-four-header'>Add a phone number</h1>
-				<p className='reg-step-four-subhead reg-step-four-paragraph'>
+		<div className='register-container'>
+			<div className='register-content'>
+				<h1 className='register-header-2'>Add a phone number</h1>
+				<p className='register-text color-gray'>
 					Enter the phone number you would like to associate with your
 					RippleTalk account. You won't get a verification code sent here.
 				</p>
-				<div className='reg-step-four-input'>
+				<div
+					className={
+						validNumber
+							? 'register-four-input-wrapper'
+							: 'register-four-input-wrapper-condensed'
+					}
+				>
 					<DropDown
 						content={countryCodeDropDown}
 						change={changeCode}
@@ -74,39 +74,32 @@ export const RegisterFormFour: React.FC = () => {
 					{validNumber ? (
 						<></>
 					) : (
-						<p className='reg-step-four-invalid'>
+						<p className='register-error'>
 							Please enter a valid 10 digit number
 						</p>
 					)}
 				</div>
-				<div className='reg-step-four-check-group'>
-					<p className='reg-step-four-paragraph'>
+				<div className='register-four-checkbox-wrapper'>
+					<p className='register-text color-gray'>
 						Let people who have your phone number find and connect with you on
-						RippleTalk. <span className='reg-step-four-link'>Learn More</span>
+						RippleTalk.{' '}
+						<span className='register-link color-blue'>Learn More</span>
 					</p>
 					<Checkbox />
 				</div>
-				<div className='reg-step-four-check-group'>
-					<p className='reg-step-four-paragraph'>
+				<div className='register-four-checkbox-wrapper'>
+					<p className='register-text color-gray'>
 						Let RippleTalk use your phone number to personalize our services,
 						including ads (if permitted by your Ads preferences). If you don't
 						enable this RippleTalk will still use your phone number for purposes
 						including account security, spam, fraud and abuse prevention.{' '}
-						<span className='reg-step-four-link'>
+						<span className='register-link color-blue'>
 							See our Privacy Policy for more information
 						</span>
 					</p>
 					<Checkbox />
 				</div>
 			</div>
-			<StyledNextButton
-				disabled={phoneNumber && validNumber ? false : true}
-				color={'black'}
-				active={phoneNumber && validNumber ? true : false}
-				onClick={sendPhoneNumber}
-			>
-				Update Number
-			</StyledNextButton>
 		</div>
 	);
 };
